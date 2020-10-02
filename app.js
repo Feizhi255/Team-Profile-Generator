@@ -1,76 +1,108 @@
-const Manager = require("./lib/Manager");
-const Engineer = require("./lib/Engineer");
-const Intern = require("./lib/Intern");
-const inquirer = require("inquirer");
-const path = require("path");
-const fs = require("fs");
+const fs = require('fs');
+const inquirer = require('inquirer');
+const util = require('util');
+const readFileAsync = util.promisify(fs.readFile);
+const writeFileAsync = util.promisify(fs.writeFile);
+const Engineer = require('./lib/Engineer');
+const Intern = require('./lib/Intern');
+const Manager = require('./lib/Manager');
+const ejs = require('ejs');
 
-const OUTPUT_DIR = path.resolve(__dirname, "output");
-const outputPath = path.join(OUTPUT_DIR, "team.html");
+const employeeArray = [];
 
-const render = require("./lib/htmlRenderer");
+function promptQuestions() {
+    return inquirer
+        .prompt([
+            {
+                type: "input",
+                message: "What is your name?",
+                name: "name"
+            },
+            {
+                type: "input",
+                message: "What is your ID?",
+                name: "id"
+            },
+            {
+                type: "input",
+                message: "What is your email address?",
+                name: "email"
+            },
+            {
+                type: "list",
+                message: "What is your role in the company?",
+                name: "role",
+                choices: [
+                    "Manager",
+                    "Engineer",
+                    "Intern"
+                ]
+            }
+        ])
+}
 
+async function generateEmployeeSummary() {
+    try {
+        let continuePrompting = true;
+        while (continuePrompting) {
+            const answers = await promptQuestions();
+            const { name, email, id, role } = answers;
+            switch (role) {
+                case "Manager":
+                    const officeRes = await inquirer.prompt(
+                        {
+                            type: "input",
+                            message: "What is your office number?",
+                            name: "office"
+                        })
+                    const { office } = officeRes;
+                    const manager = new Manager(name, email, id, office);
+                    employeeArray.push(manager);
+                    break;
+                case "Engineer":
+                    const githubRes = await inquirer.prompt(
+                        {
+                            type: "input",
+                            message: "What is your github username?",
+                            name: "github"
+                        })
+                    const { github } = githubRes;
+                    const engineer = new Engineer(name, email, id, github);
+                    employeeArray.push(engineer);
+                    break;
+                case "Intern":
+                    const schoolRes = await inquirer.prompt(
+                        {
+                            type: "input",
+                            message: "What is your school name?",
+                            name: "school"
+                        })
+                    const { school } = schoolRes
+                    const intern = new Intern(name, email, id, school);
+                    employeeArray.push(intern);
+                    break;
+            }
 
-// Write code to use inquirer to gather information about the development team members,
-inquirer.prompt([
-    {
-      type: "input",
-      name: "name",
-      message: "What is your name?"
-    },
-    {
-      type: "checkbox",
-      message: "What languages do you know?",
-      name: "stack",
-      choices: [
-        "HTML", 
-        "CSS", 
-        "JavaScript", 
-        "MySQL"
-      ]
-    },
-    {
-      type: "list",
-      message: "What is your preferred method of communication?",
-      name: "contact",
-      choices: [
-        "email",
-        "phone",
-        "telekinesis"
-      ]
+            const addEmployee = await inquirer.prompt({
+                type: "list",
+                message: "ADD MORE EMPLOYEES?",
+                name: "add",
+                choices: [
+                    "yes",
+                    "no"
+                ]
+            })
+            if (addEmployee.add === "no") {
+                continuePrompting = false;
+            }
+        }
+
+        const finalHTML = await ejs.renderFile("./templates/main.html", { employeeArray });
+        await writeFileAsync("./output/team.html", finalHTML, 'utf-8');
     }
-  ]).then(function(data) {
-  
-    var filename = data.name.toLowerCase().split(' ').join('') + ".json";
-  
-    fs.writeFile(filename, JSON.stringify(data, null, '\t'), function(err) {
-  
-      if (err) {
-        return console.log(err);
-      }
-  
-      console.log("Success!");
-  
-    });
-  });
-// and to create objects for each team member (using the correct classes as blueprints!)
 
-// After the user has input all employees desired, call the `render` function (required
-// above) and pass in an array containing all employee objects; the `render` function will
-// generate and return a block of HTML including templated divs for each employee!
-
-// After you have your html, you're now ready to create an HTML file using the HTML
-// returned from the `render` function. Now write it to a file named `team.html` in the
-// `output` folder. You can use the variable `outputPath` above target this location.
-// Hint: you may need to check if the `output` folder exists and create it if it
-// does not.
-
-// HINT: each employee type (manager, engineer, or intern) has slightly different
-// information; write your code to ask different questions via inquirer depending on
-// employee type.
-
-// HINT: make sure to build out your classes first! Remember that your Manager, Engineer,
-// and Intern classes should all extend from a class named Employee; see the directions
-// for further information. Be sure to test out each class and verify it generates an
-// object with the correct structure and methods. This structure will be crucial in order
-// for the provided `render` function to work! ```
+    catch (err) {
+        console.log(err)
+    }
+}
+generateEmployeeSummary();
