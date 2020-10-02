@@ -12,13 +12,13 @@
     <title>Employee Summary</title>
 </head>
 
-<body>
-    <div class="jumbotron-fluid py-4" style="background-color: #ff525b; color: white;">
+<body class="bg-secondary">
+    <div class="jumbotron">
         <div class="container">
             <h1 class="text-center">Employee Summary</h1>
         </div>
     </div>
-    <div class="container-fluid mt-5">
+    <div class="container mt-5">
         <div class="row">
             <% employeeArray.forEach(function(employee){ %>
             <% if (employee.getRole() === "Manager") { %>
