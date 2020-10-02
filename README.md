@@ -6,7 +6,7 @@ Use this to make a fast and easy team generator, so that others can find and get
 
 ### Example gif
 
-![Example of application](./assests/exampleGIF/readmegif.gif)
+![Example of application](./assests/gif/teamgen.gif)
 
 ### Example of Finished work
 ![Example of how it might look](./assests/image/TeamGen.png)
