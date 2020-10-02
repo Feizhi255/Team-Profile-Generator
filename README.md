@@ -31,7 +31,7 @@ Use this to make a fast and easy team generator, so that others can find and get
 
         node app.js
 
-  The user will be prompted for their GitHub username and other information pertaining to the project the README is for.
+  The user will be prompted with teammate information pertaining to there ID, Email, Office Number/Github, and or school.
 ## Licence
 ![APM](https://img.shields.io/apm/l/npm)
 ## Contributors
